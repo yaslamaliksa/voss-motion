@@ -1,0 +1,122 @@
+@import 'tailwindcss';
+
+/* Animatable accent: flips cyan -> amber when the bulb is lit */
+@property --accent {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #3de2ff;
+}
+@property --surface {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #07080a;
+}
+
+@theme inline {
+  --font-display: 'Sora', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+  --color-ink: #050505;
+  --color-surface: var(--surface);
+  --color-panel: #0d0f12;
+  --color-accent: var(--accent);
+  --color-volt: #3de2ff;
+  --color-amber: #ffb44d;
+}
+
+/* State-driven theme: html[data-power] + html[data-bulb] are written by the store */
+:root {
+  --accent: #3de2ff;
+  --surface: #07080a;
+  transition: --accent 1.2s ease, --surface 1.6s ease;
+}
+:root[data-bulb='on'] {
+  --accent: #ffb44d;
+  --surface: #0c0a08;
+}
+
+@custom-variant bulb-on (&:where([data-bulb='on'], [data-bulb='on'] *));
+
+html {
+  background: #050505;
+  color-scheme: dark;
+}
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  background: var(--surface);
+  color: #e8eaee;
+  font-family: 'Sora', ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--accent);
+  color: #050505;
+}
+
+/* Hide native cursor only on fine pointers where the custom cursor mounts */
+@media (pointer: fine) {
+  html[data-power='on'] [data-cursor='bulb'] {
+    cursor: none;
+  }
+}
+
+/* Ambient float: transform-only, GPU composited */
+@keyframes float-y {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(var(--r, 0deg)); }
+  50% { transform: translate3d(0, calc(var(--amp, 14px) * -1), 0) rotate(calc(var(--r, 0deg) + 1.5deg)); }
+}
+.float {
+  animation: float-y var(--dur, 7s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+  will-change: transform;
+}
+
+@keyframes marquee {
+  to { transform: translate3d(-50%, 0, 0); }
+}
+.marquee-track {
+  animation: marquee 38s linear infinite;
+  will-change: transform;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+@keyframes scan {
+  to { transform: translate3d(-120px, 0, 0); }
+}
+
+.hazard {
+  background-image: repeating-linear-gradient(-45deg, #e8b400 0 10px, #111 10px 20px);
+}
+
+.grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .float,
+  .marquee-track {
+    animation: none;
+  }
+}
